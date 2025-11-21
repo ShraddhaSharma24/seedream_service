@@ -22,7 +22,7 @@ class SeedreamClient:
         max_images: int = 3,
         size: str = "2K",
         watermark: bool = True,
-        stream: bool = False,
+        stream: bool = True,   # IMPORTANT FIX (ByteDance requires stream=True)
         response_format: str = "url",
     ) -> Dict[str, Any]:
 
@@ -38,7 +38,7 @@ class SeedreamClient:
         }
 
         if images:
-            payload["image"] = images
+            payload["image"] = images  # matches cURL sample
 
         return payload
 
@@ -49,7 +49,7 @@ class SeedreamClient:
         max_images: int = 3,
         size: str = "2K",
         watermark: bool = True,
-        stream: bool = False,
+        stream: bool = True,  # IMPORTANT FIX
         response_format: str = "url",
     ) -> List[str]:
 
@@ -73,17 +73,24 @@ class SeedreamClient:
 
         logger.info("Seedream response: %s", result)
 
+        # Expected response:
+        # { "data": [ { "url": "..." }, { "url": "..." } ] }
+        urls: List[str] = []
+
         if isinstance(result, dict) and "data" in result:
-            urls = []
             for item in result["data"]:
                 if isinstance(item, dict) and "url" in item:
                     urls.append(item["url"])
-            return urls
 
+            if urls:
+                return urls
+
+        # Handle API error
         if isinstance(result, dict) and ("error" in result or "message" in result):
             raise RuntimeError(f"Seedream API error: {result}")
 
         logger.warning("Unexpected Seedream response. Returning empty list.")
         return []
+
 
 
