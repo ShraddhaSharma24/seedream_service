@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seedream Image Generation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        textarea { width: 100%; height: 100px; }
+        input, button { padding: 8px; margin-top: 8px; }
+        .image-result { margin-top: 20px; }
+        .image-result img { max-width: 300px; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Seedream Image Generation</h1>
+    <form method="post">
+        <label>Prompt:</label><br>
+        <textarea name="prompt">{{ prompt if prompt else "" }}</textarea><br><br>
+        
+        <label>Reference Image URLs (one per line, optional):</label><br>
+        <textarea name="images_text">{{ images_text if images_text else "" }}</textarea><br><br>
+
+        <label>Max Images:</label>
+        <input type="number" name="max_images" value="3"><br>
+        <label>Size:</label>
+        <select name="size">
+            <option value="2K" selected>2K</option>
+            <option value="1K">1K</option>
+            <option value="512x512">512x512</option>
+        </select><br>
+        <label>Watermark:</label>
+        <select name="watermark">
+            <option value="True" selected>True</option>
+            <option value="False">False</option>
+        </select><br><br>
+
+        <button type="submit">Generate Images</button>
+    </form>
+
+    {% if urls %}
+        <div class="image-result">
+            <h2>Generated Images:</h2>
+            {% for url in urls %}
+                <img src="{{ url }}" alt="Generated Image">
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>
