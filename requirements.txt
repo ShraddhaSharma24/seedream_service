@@ -1,9 +1,11 @@
 fastapi
 uvicorn
+gradio==4.44.0
+python-multipart
 requests
 python-dotenv
-python-multipart
-gradio==3.50.2
+
+
 
 
 
