@@ -3,7 +3,8 @@ uvicorn
 requests
 python-dotenv
 python-multipart
-gradio
+gradio==4.40.0
+
 
 
 
