@@ -8,6 +8,10 @@ import uvicorn
 
 load_dotenv()
 API_KEY = os.getenv("ARK_API_KEY")
+
+# DEBUG: Print environment variable value
+print("DEBUG ARK_API_KEY =", API_KEY)
+
 seedream_client = SeedreamClient(API_KEY)
 
 def generate_seedream(prompt, images_text, max_images, size, watermark):
@@ -56,6 +60,7 @@ app = gr.mount_gradio_app(app, gradio_app, path="/")
 # ------------------ LOCAL RUN ------------------
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=10000)
+
 
 
 
