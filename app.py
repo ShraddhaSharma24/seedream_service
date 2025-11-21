@@ -18,7 +18,6 @@ def generate_seedream(prompt, images_text, max_images, size, watermark):
         size=size,
         watermark=watermark,
     )
-
     return urls
 
 # --- Gradio UI ---
@@ -31,17 +30,29 @@ app = gr.Interface(
         gr.Dropdown(["2K", "1K", "512x512"], value="2K", label="Size"),
         gr.Checkbox(label="Watermark", value=True),
     ],
-    outputs=gr.Gallery(label="Generated Images").style(grid=3, height="auto"),
+
+    # FIX: removed `.style()`, use built-in gallery props instead
+    outputs=gr.Gallery(label="Generated Images", columns=3, height="auto"),
+
     title="Seedream Image Generator",
     description="Generate stunning AI images with Seedream using your prompts and reference images.",
 )
 
-# For Render deployment
+# --- FastAPI wrapper for Render deployment ---
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 fastapi_app = FastAPI()
+
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 fastapi_app = gr.mount_gradio_app(fastapi_app, app, path="/")
 
 @fastapi_app.get("/")
@@ -50,6 +61,8 @@ def home():
 
 if __name__ == "__main__":
     uvicorn.run(fastapi_app, host="0.0.0.0", port=10000)
+
+
 
 
 
