@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from typing import List
 import os
 from bytedance.seedream import SeedreamClient
@@ -14,8 +13,8 @@ seedream_client = SeedreamClient(API_KEY)
 app = FastAPI(title="Seedream Image Generation Service")
 templates = Jinja2Templates(directory="templates")
 
-# Optional: Serve static files if needed
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Removed static mount since we don't have a static/ folder
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
@@ -40,3 +39,5 @@ def generate(
         watermark=watermark.lower() == "true"
     )
     return templates.TemplateResponse("index.html", {"request": request, "urls": urls, "prompt": prompt, "images_text": images_text})
+
+
