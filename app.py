@@ -1,43 +1,56 @@
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from typing import List
-import os
+import gradio as gr
 from bytedance.seedream import SeedreamClient
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv("ARK_API_KEY")
 seedream_client = SeedreamClient(API_KEY)
 
-app = FastAPI(title="Seedream Image Generation Service")
-templates = Jinja2Templates(directory="templates")
-
-# Removed static mount since we don't have a static/ folder
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "urls": []})
-
-@app.post("/", response_class=HTMLResponse)
-def generate(
-    request: Request,
-    prompt: str = Form(...),
-    images_text: str = Form(""),
-    max_images: int = Form(3),
-    size: str = Form("2K"),
-    watermark: str = Form("True")
-):
-    # Convert multiline image URLs to list
+def generate_seedream(prompt, images_text, max_images, size, watermark):
+    # Convert multiline text → list
     images = [line.strip() for line in images_text.splitlines() if line.strip()]
+
     urls = seedream_client.generate_images(
         prompt=prompt,
         images=images,
         max_images=max_images,
         size=size,
-        watermark=watermark.lower() == "true"
+        watermark=watermark,
     )
-    return templates.TemplateResponse("index.html", {"request": request, "urls": urls, "prompt": prompt, "images_text": images_text})
+
+    return urls
+
+# --- Gradio UI ---
+app = gr.Interface(
+    fn=generate_seedream,
+    inputs=[
+        gr.Textbox(label="Prompt", placeholder="Describe the image you want...", lines=3),
+        gr.Textbox(label="Reference Image URLs (optional)", lines=3),
+        gr.Slider(1, 6, value=3, step=1, label="Number of Images"),
+        gr.Dropdown(["2K", "1K", "512x512"], value="2K", label="Size"),
+        gr.Checkbox(label="Watermark", value=True),
+    ],
+    outputs=gr.Gallery(label="Generated Images").style(grid=3, height="auto"),
+    title="Seedream Image Generator",
+    description="Generate stunning AI images with Seedream using your prompts and reference images.",
+)
+
+# For Render deployment
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+fastapi_app = FastAPI()
+fastapi_app = gr.mount_gradio_app(fastapi_app, app, path="/")
+
+@fastapi_app.get("/")
+def home():
+    return {"message": "Seedream Gradio App Running"}
+
+if __name__ == "__main__":
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=10000)
+
+
 
 
