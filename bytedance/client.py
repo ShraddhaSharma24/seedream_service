@@ -2,7 +2,7 @@ import requests
 import time
 
 class ByteDanceClient:
-    def __init__(self, api_key: str, base_url: str = "https://ark.cn-beijing.volces.com/api/v3"):
+    def __init__(self, api_key: str, base_url: str = "https://ark.ap-southeast.bytepluses.com/api/v3/contents/generations/tasks"):
         self.api_key = api_key
         self.base_url = base_url
         self.headers = {
@@ -22,3 +22,4 @@ class ByteDanceClient:
                     time.sleep(backoff * (attempt + 1))
                 else:
                     raise e
+
